@@ -4,6 +4,7 @@ Resumo dos itens/requisitos que serão explicitamente avaliados:
 
 1. (obrigatório) Verificação numérica do gradiente;
 2. (obrigatório) Interface de linha de comando para teste do backpropagation;
+
 **3. (obrigatório) Backpropagation implementado de forma completa e correta; OK
 4. (obrigatório) Suporte a regularização; OK**
 5. (obrigatório) k-folds+F1 score; **#verificar** 
