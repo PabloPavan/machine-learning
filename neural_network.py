@@ -30,11 +30,14 @@ def main():
     logger.info('network format: {}'.format(network)) 
 
     nn = neural_network(reg_value, network, initial_weights_file, args.dataset, logger)
+
+
     nn.create_vectors()
+    # for kfold 
     nn.training()
 
     
-    print("J", nn.j_total)
+    print("\nJ", nn.j_total)
 
 
 if __name__ == "__main__":
