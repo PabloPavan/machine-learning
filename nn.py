@@ -5,6 +5,7 @@ import logging
 import logging.handlers
 from utils import *
 
+
 class neural_network():
 
     def __init__(self, reg_value, network, initial_weights_file, dataset, logger):
