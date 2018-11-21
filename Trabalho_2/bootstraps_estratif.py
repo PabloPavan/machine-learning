@@ -5,9 +5,8 @@ Created on Wed Nov  7 19:22:47 2018
 @author: cnorn
 """
 
-
 import pandas as pd
-import numpy as np
+#import numpy as np
 import math
 
 dataset = pd.read_csv('wine.data')
