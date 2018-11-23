@@ -61,7 +61,7 @@ class neural_network():
     def training(self):
         itertion = 0
        
-        while(itertion != 5000):
+        while(itertion != 500):
 
             self.num_lines = sum(1 for line in open(self.dataset))
             self.dataset_file = open(self.dataset, "r")
