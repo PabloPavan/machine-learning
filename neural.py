@@ -1,117 +1,7 @@
 import numpy as np
+from utils import *
 
-max_iterations 	= 1
-alpha   		= 0.001
-epsilon 		= 0.0000010000
-
-def f(x):
-	return x
-
-def sig(x):
-	return 1/(1+np.exp(-1*f(x)))
-
-def numVer(A):
-	return (f(A + epsilon) - f(A - epsilon)) / (2 * epsilon)
-
-def print1Dmm(A):
-	s = ""
-	for i in A:
-		s += ("%.5f " % i)
-	return s
-
-def print1Dm(A):
-	s = ""
-	for i in A:
-		s = s + print1Dmm(i) + " "
-	return s
-
-def print1D(A):
-	s = ""
-	for i in A:
-		s += ("%.5f " % i)
-	return s
-
-def print2D(A, tab="\t"):
-	s = ""
-	for i in A:
-		s = s +  str(tab) + print1D(i) + "\n"
-	return s
-
-def print3D(A):
-	s = ""
-	for i in A:
-		s = s + print2D(i) + "\n"
-	return s
-
-
-def main():
-	np.set_printoptions(precision=5)
-	
-	network=[]
-
-	fnetwork = open("network2.txt", "r")
-	regularization = float(fnetwork.readline())
-	for line in fnetwork:
-		network.append(int(line))
-	fnetwork.close()
-	
-	print("Parametro de regularizacao lambda=", regularization, "\n")
-	print("Inicializando rede com a seguinte estrutura de neuronios por camadas:", network, "\n")
-
-	# lista de matrizes de pesos
-	weights=[]
-	fweights = open("initial_weights2.txt", "r")
-
-	i = 0
-	for l in fweights:
-		weights.append([])
-		j = 0
-		for n in l.split(";"):
-			weights[i].append([])
-			k = 0
-			for w in n.split(","):
-				weights[i][j].append(float(w))
-				k = k + 1
-			j = j + 1
-		weights[i] = np.array(weights[i])
-		i = i + 1
-
-	fweights.close()
-
-	for c in range(0, len(weights)):
-		print("Theta", c + 1, "inicial (pesos de cada neuronio, incluindo bias, armazenados nas linhas):\n", print2D(weights[c]))
-
-	inputs=[]
-	predictions=[]
-
-	fdataset = open("dataset2.txt", "r")
-	i = 0
-	for l in fdataset:
-		a, b = l.split(";")
-
-		inputs.append([])
-		for v in a.split(","):
-			inputs[i].append(float(v))
-
-		predictions.append([])
-		for v in b.split(","):
-			predictions[i].append(float(v))
-
-		i = i + 1
-
-	for l in range(0, len(inputs)):
-		inputs[l] =	np.array(inputs[l], ndmin=2).T
-
-	for l in range(0, len(predictions)):
-		predictions[l] =	np.array(predictions[l], ndmin=2).T
-	
-	print("Conjunto de treinamento")
-	for l in range(0, len(inputs)):
-		print("\tExemplo", l + 1)
-		print("\t\tx:", print1D(inputs[l]))
-		print("\t\ty:", print1D(predictions[l]))
-
-	fdataset.close()
+def neural_network(network,weights,regularization,inputs, predictions, max_iterations,alpha):
 
 	iterations = 0
 	while iterations < max_iterations:
@@ -206,13 +96,9 @@ def main():
 		# for layer in range(0, len(network) - 1):
 		# 	Dver = numVer(D[layer])
 		# 	print("Gradientes finais para Theta" + str(layer + 1) + ":\n", print2D(Dver, tab="\t\t"))
-			# print(print2D(delta[example]))
+		# 	print(print2D(delta[example]))
 
 		for layer in range(0, len(network) - 1):
 			weights[layer] = weights[layer] - alpha * D[layer]
 		# 	print("Theta", layer + 1, "inicial (pesos de cada neuronio, incluindo bias, armazenados nas linhas):\n", print2D(weights[layer]))
-
-
-
-if __name__ == "__main__":
-    main() 
+	return 0

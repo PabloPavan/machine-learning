@@ -1,33 +1,47 @@
 import numpy as np
-import logging
-import logging.handlers
-
-def func(x, func=True):
-	if func:
-		return 1/(1+np.exp(-1*f(x)))
-	else:
-		return f(x) * (f(x) > 0)
 
 def f(x):
 	return x
 
+def sig(x):
+	return 1/(1+np.exp(-1*f(x)))
+
+def numVer(A):
+	return (f(A + epsilon) - f(A - epsilon)) / (2 * epsilon)
+
+def print1Dmm(A):
+	s = ""
+	for i in A:
+		s += ("%.5f " % i)
+	return s
+
+def print1Dm(A):
+	s = ""
+	for i in A:
+		s = s + print1Dmm(i) + " "
+	return s
+
+def print1D(A):
+	s = ""
+	for i in A:
+		s += ("%.5f " % i)
+	return s
+
+def print2D(A, tab="\t"):
+	s = ""
+	for i in A:
+		s = s +  str(tab) + print1D(i) + "\n"
+	return s
+
+def print3D(A):
+	s = ""
+	for i in A:
+		s = s + print2D(i) + "\n"
+	return s
+
 def normalize(data):
 	return  data/data.max(axis=0)
 
-def configureLog(logger):
-		
-		logger.setLevel(logging.DEBUG)
-
-		
-		formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(processName)s - %(message)s')
-
-		
-		handler = logging.handlers.RotatingFileHandler("results.log", maxBytes=268435456, backupCount=50, encoding='utf8')
-
-		handler.setFormatter(formatter)
-		logger.addHandler(handler)
-
-		logger.info('neural_network has started')
 
 def major_voting(result_data, dict):
     count = result_data.count(dict[0])

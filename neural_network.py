@@ -1,45 +1,96 @@
 import numpy as np
-import re
-import math
 from utils import *
-from nn import *
+from neural import *
 import argcomplete,argparse
-import logging
-import logging.handlers
-from argcomplete.completers import EnvironCompleter
 
-def read_files(network, weights):
-    
-    return np.loadtxt(network, dtype='float', delimiter=',', skiprows=0)[0],  np.loadtxt(network, dtype='i', delimiter=',', skiprows=1), open(weights, "r")
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Argument')
-    parser.add_argument('--network', "--n",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    parser.add_argument('--weights', "--w",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    parser.add_argument('--dataset', "--d",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    parser.add_argument('--log', "--l", required=False, default=True).completer = EnvironCompleter
+    # parser = argparse.ArgumentParser(description='Argument')
+    # parser.add_argument('--network', "--n",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
+    # parser.add_argument('--weights', "--w",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
+    # parser.add_argument('--dataset', "--d",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
+    # parser.add_argument('--log', "--l", required=False, default=True).completer = EnvironCompleter
 
-    argcomplete.autocomplete(parser)
-    args = parser.parse_args()
-    if args.log:
-        configureLog(logger=logger)
-     
-    # init 
-    reg_value, network, initial_weights_file = read_files(args.network, args.weights)
-    logger.info('network format: {}'.format(network)) 
-
-    nn = neural_network(reg_value, network, initial_weights_file, args.dataset, logger)
-
-
-    nn.create_vectors()
-    # for kfold 
-    nn.training()
-
+    # argcomplete.autocomplete(parser)
+    # args = parser.parse_args()
     
-    print("\nJ", nn.j_total)
+     
+    np.set_printoptions(precision=5)
+    
+    network=[]
+
+    fnetwork = open("network2.txt", "r")
+    regularization = float(fnetwork.readline())
+    for line in fnetwork:
+        network.append(int(line))
+    fnetwork.close()
+    
+    print("Parametro de regularizacao lambda=", regularization, "\n")
+    print("Inicializando rede com a seguinte estrutura de neuronios por camadas:", network, "\n")
+
+    # lista de matrizes de pesos
+    weights=[]
+    fweights = open("initial_weights2.txt", "r")
+
+    i = 0
+    for l in fweights:
+        weights.append([])
+        j = 0
+        for n in l.split(";"):
+            weights[i].append([])
+            k = 0
+            for w in n.split(","):
+                weights[i][j].append(float(w))
+                k = k + 1
+            j = j + 1
+        weights[i] = np.array(weights[i])
+        i = i + 1
+
+    fweights.close()
+
+    for c in range(0, len(weights)):
+        print("Theta", c + 1, "inicial (pesos de cada neuronio, incluindo bias, armazenados nas linhas):\n", print2D(weights[c]))
+
+    inputs=[]
+    predictions=[]
+
+    fdataset = open("dataset2.txt", "r")
+    i = 0
+    for l in fdataset:
+        a, b = l.split(";")
+
+        inputs.append([])
+        for v in a.split(","):
+            inputs[i].append(float(v))
+
+        predictions.append([])
+        for v in b.split(","):
+            predictions[i].append(float(v))
+
+        i = i + 1
+
+    for l in range(0, len(inputs)):
+        inputs[l] = np.array(inputs[l], ndmin=2).T
+
+    for l in range(0, len(predictions)):
+        predictions[l] =    np.array(predictions[l], ndmin=2).T
+    
+    print("Conjunto de treinamento")
+    for l in range(0, len(inputs)):
+        print("\tExemplo", l + 1)
+        print("\t\tx:", print1D(inputs[l]))
+        print("\t\ty:", print1D(predictions[l]))
+
+    fdataset.close()
+
+    max_iterations  = 1
+    alpha           = 0.001
+    epsilon         = 0.0000010000
+
+    neural_network(network,weights,regularization, inputs, predictions, max_iterations,alpha)
 
 
 if __name__ == "__main__":
-    logger = logging.getLogger('neural_network')
+
     main()
