@@ -1,7 +1,7 @@
 import numpy as np
 
 def f(x):
-	return x
+	return x + x + x
 
 def sig(x):
 	return 1/(1+np.exp(-1*f(x)))

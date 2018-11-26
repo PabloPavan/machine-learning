@@ -4,15 +4,15 @@ import argparse
 
 def main():
 
-	parser = argparse.ArgumentParser(description='Argument')
-	parser.add_argument('--inputname', "--i",required=True,  metavar='FILE', type=str)
-	parser.add_argument('--outputname', "--o",required=True,  metavar='FILE', type=str)
-	args = parser.parse_args()
+	# parser = argparse.ArgumentParser(description='Argument')
+	# parser.add_argument('--inputname', "--i",required=True,  metavar='FILE', type=str)
+	# parser.add_argument('--outputname', "--o",required=True,  metavar='FILE', type=str)
+	# args = parser.parse_args()
 	
 
-	network = np.loadtxt(args.inputname, dtype='i', delimiter=',', skiprows=1)
+	network = np.loadtxt("net_io.txt", dtype='i', delimiter=',', skiprows=1)
 
-	file = open(args.outputname, 'w')
+	file = open("pesos_io.txt", 'w')
 
 	for x in range(1, len(network)):  # linha por linha 
 		final = []

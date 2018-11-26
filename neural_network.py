@@ -74,8 +74,9 @@ def main():
         inputs[l] = np.array(inputs[l], ndmin=2).T
 
     for l in range(0, len(predictions)):
-        predictions[l] =    np.array(predictions[l], ndmin=2).T
-    
+        predictions[l] = np.array(predictions[l], ndmin=2).T
+
+
     print("Conjunto de treinamento")
     for l in range(0, len(inputs)):
         print("\tExemplo", l + 1)
