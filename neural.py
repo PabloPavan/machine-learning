@@ -97,7 +97,27 @@ def feedfoward(network, weights, inputs, predictions):
         layer = layer + 1
         input_propagate[example].append(np.array(sig(z), ndmin=2))
 
-        input_propagate[example][layer] = np.around(input_propagate[example][layer])
+        #input_propagate[example][layer] = np.around(input_propagate[example][layer])
+        if len(input_propagate[example][layer]) == 2:
+            if input_propagate[example][layer][0] >= input_propagate[example][layer][1]:
+                input_propagate[example][layer][0] = 1 
+                input_propagate[example][layer][1] = 0
+            else:
+                input_propagate[example][layer][0] = 0
+                input_propagate[example][layer][1] = 1
+        else:
+            if input_propagate[example][layer][0] >= input_propagate[example][layer][1] and (input_propagate[example][layer][0] >= input_propagate[example][layer][2]):
+                input_propagate[example][layer][0] = 1 
+                input_propagate[example][layer][1] = 0
+                input_propagate[example][layer][2] = 0
+            elif input_propagate[example][layer][1] >= input_propagate[example][layer][0] and (input_propagate[example][layer][1] >= input_propagate[example][layer][2]):
+                input_propagate[example][layer][0] = 0
+                input_propagate[example][layer][1] = 1
+                input_propagate[example][layer][2] = 0
+            else:
+                input_propagate[example][layer][0] = 0
+                input_propagate[example][layer][1] = 0
+                input_propagate[example][layer][2] = 1
 
         # print("\tSaida predita para o exemplo :", print1D(input_propagate[example][layer]))
         # print("\tSaida esperada para o exemplo :", print1D(predictions[example]))

@@ -6,7 +6,7 @@ import math
 from sklearn.utils import shuffle
 #import argcomplete, argparse
 
-max_iterations  = 1000
+max_iterations  = 200
 alpha           = 0.1
 epsilon         = 0.0000010000
 num_kfolds      = 10
