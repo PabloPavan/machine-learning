@@ -1,7 +1,7 @@
 import numpy as np
 import random
 def f(x):
-	return x+np.sin(x)
+	return x
 
 def sig(x):
 	return 1/(1+np.exp(-1*f(x)))
