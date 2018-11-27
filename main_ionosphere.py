@@ -4,36 +4,29 @@ from neural import *
 from metrics import *
 import math
 from sklearn.utils import shuffle
-#import argcomplete, argparse
+import time
+import sys
+import csv
 
-max_iterations  = 1000
-alpha           = 0.3
+max_iterations  = 1
 epsilon         = 0.0000010000
 num_kfolds      = 10
 
 def main():
-    # parser = argparse.ArgumentParser(description='Argument')
-    # parser.add_argument('--network', "--n",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    # parser.add_argument('--weights', "--w",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    # parser.add_argument('--dataset', "--d",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    # parser.add_argument('--log', "--l", required=False, default=True).completer = EnvironCompleter
 
-    # argcomplete.autocomplete(parser)
-    # args = parser.parse_args()
+    inicio = time.time()
+
 
     np.set_printoptions(precision=5)
 
     network = []
 
-    fnetwork = open("net_io.txt", "r")
+    fnetwork = open(sys.argv[1], "r")
     regularization = float(fnetwork.readline())
+    alpha = float(fnetwork.readline())
     for line in fnetwork:
         network.append(int(line))
     fnetwork.close()
-
-    print("Parametro de regularizacao lambda=", regularization, "\n")
-    print("Inicializando rede com a seguinte estrutura de neuronios por camadas:", network, "\n")
-
 
     inputs = []
     predictions = []
@@ -74,18 +67,6 @@ def main():
         class2 = len(predictions)-class1
         l_class.append(class1)
         l_class.append(class2)
-    # else:
-    #     for v_pred in predictions:
-    #        # print()
-    #         if [[1, 0, 1]] in v_pred.T:
-    #         #    print("a1")
-    #             class1 += 1
-    #         if [[0, 1]] in v_pred.T:
-    #          #   print("a2")
-    #             class2 += 1
-        # print(len(predictions))
-        # class3 = len(predictions) - class1 - class2
-
 
     for valor in range(0, total_class):
         l_class[valor] = int(l_class[valor]/num_kfolds)
@@ -136,17 +117,6 @@ def main():
     lista_kfold_input.append(tempx)
     lista_kfold_predition.append(tempy)
 
-
-
-    # print("Conjunto de treinamento")
-    # for l in range(0, len(lista_kfold_input)):
-    #     print("\tExemplo", l + 1)
-    #     print("\t\tx:", print1D(lista_kfold_input[0][l]))
-    #     print("\t\ty:", print1D(lista_kfold_predition[0][l]))
-
-
-    # build the test data
-
     k_f = 0
     f_mes = []
     while k_f != num_kfolds:
@@ -179,10 +149,6 @@ def main():
         class2 = np.array(([0],[1]))
 
 
-        # print(test_pred[0].shape)
-        # print(a[0].shape)
-        # print(tp.shape)
-
         confusion_matrix = np.zeros(shape=(2, 2))
         for j in range(0, len(a)):
 
@@ -195,9 +161,7 @@ def main():
             elif np.array_equal(class2, a[j]) and not (np.array_equal(test_pred[j], a[j])):
                 confusion_matrix[1][0] += 1
 
-        print(confusion_matrix)
-
-    
+        #print(confusion_matrix)
 
         prec_array = []
         rec_array = []
@@ -215,12 +179,18 @@ def main():
         f_mes.append(f1)
 
     media_fmes = sum(f_mes)/len(f_mes)
+    fim = time.time()
+
+    print("lambda:", regularization)
+    print("alpha:", alpha)
     print("media:", media_fmes)
+    
     for q in range(0, len(f_mes)):
         variancia = math.pow(f_mes[q] - media_fmes, 2) / len(f_mes)
     print("variancia:", variancia)
     desvio_padrao = math.sqrt(variancia)
-    print("desvio padrao", desvio_padrao)
+    print("desvio_padrao:", desvio_padrao)
+    print("tempo:", fim - inicio)
 
 if __name__ == "__main__":
 

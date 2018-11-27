@@ -4,13 +4,15 @@ from utils import *
 epsilon = 0.00001
 def neural_network(network, weights, regularization, inputs, predictions, max_iterations, alpha):
     iterations = 0
+    Jtotal = 0
     while iterations < max_iterations:
         iterations = iterations + 1
         # print("\r Iteration", iterations)
 
 
-        Jtotal = 0
+        
         input_propagate = []
+        prev_J = Jtotal 
         for example in range(0, len(inputs)):
             input_propagate.append([])
             for layer in range(0, len(network) - 1):
@@ -34,11 +36,19 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
 
         Jtotal /= len(inputs)
 
-        print("\rJ", Jtotal)
         S = 0
         for layer in range(0, len(network) - 1):
             S += np.sum(np.delete(weights[layer], 0, axis=1) ** 2)
         S = regularization / (2 * len(inputs)) * S
+        
+
+        Jtotal = Jtotal+S 
+        if abs(Jtotal - prev_J) <= 0.0001:
+            max_iterations = iterations
+            # print("iterations:", iterations)
+            # print("J", Jtotal+S)
+            # print("Prev J", prev_J)
+
 
         delta = []
         D = []
