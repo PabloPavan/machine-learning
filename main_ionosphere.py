@@ -6,8 +6,8 @@ import math
 from sklearn.utils import shuffle
 #import argcomplete, argparse
 
-max_iterations  = 200
-alpha           = 0.1
+max_iterations  = 1000
+alpha           = 0.3
 epsilon         = 0.0000010000
 num_kfolds      = 10
 
@@ -34,34 +34,11 @@ def main():
     print("Parametro de regularizacao lambda=", regularization, "\n")
     print("Inicializando rede com a seguinte estrutura de neuronios por camadas:", network, "\n")
 
-    # lista de matrizes de pesos
-    weights = []
-    fweights = open("pesos_io.txt", "r")
-
-    i = 0
-    for l in fweights:
-        weights.append([])
-        j = 0
-        for n in l.split(";"):
-            weights[i].append([])
-            k = 0
-            for w in n.split(","):
-                weights[i][j].append(float(w))
-                k = k + 1
-            j = j + 1
-        weights[i] = np.array(weights[i])
-        i = i + 1
-
-    fweights.close()
-
-    # for c in range(0, len(weights)):
-    #     print("Theta", c + 1, "inicial (pesos de cada neuronio, incluindo bias, armazenados nas linhas):\n",
-    #           print2D(weights[c]))
 
     inputs = []
     predictions = []
 
-    #fdataset = open("Trabalho_2/wine.data", "r")
+
     fdataset = open("data/ionosphere.data", "r")
 
     i = 0
@@ -83,12 +60,7 @@ def main():
     for l in range(0, len(predictions)):
         predictions[l] = np.array(predictions[l], ndmin=2).T
     fdataset.close()
-    # print("Conjunto de treinamento")
-    # for l in range(0, len(inputs)):
-    #     print("\tExemplo", l + 1)
-    #     print("\t\tx:", print1D(inputs[l]))
-    #     print("\t\ty:", print1D(predictions[l]))
-    #
+
     class1 = 0
     class2 = 0
     class3 = 0
@@ -174,9 +146,14 @@ def main():
 
 
     # build the test data
+
     k_f = 0
     f_mes = []
     while k_f != num_kfolds:
+        weights=build_weights(network)
+
+        
+
         train_input = []
         train_pred = []
         test_pred = lista_kfold_predition[k_f]
@@ -188,7 +165,7 @@ def main():
                     train_input.append(lista_kfold_input[w][j])
                     train_pred.append(lista_kfold_predition[w][j])
 
-        train_input, train_pred = shuffle(train_input, train_pred, random_state=0)
+        train_input, train_pred = shuffle(train_input, train_pred)
         # here! add normalize data
         #train_input = normalize(np.asarray(train_input))
         #test_input = normalize(np.asarray(test_input))
@@ -218,7 +195,10 @@ def main():
             elif np.array_equal(class2, a[j]) and not (np.array_equal(test_pred[j], a[j])):
                 confusion_matrix[1][0] += 1
 
-                # print(confusion_matrix)
+        print(confusion_matrix)
+
+    
+
         prec_array = []
         rec_array = []
         # calcula prec e rec pra cada coluna

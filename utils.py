@@ -51,3 +51,18 @@ def normalize(data):
 	return (data-data.min(axis=0))/(data.max(axis=0)-data.min(axis=0))
 
 
+def build_weights(network):
+
+	weights = []
+	for x in range(1, len(network)):  # linha por linha 
+	        temp1 = []
+	        for y in range(0, network[x]): #valores para cada um dos neuronios 
+	            temp2 = []
+	            for z in range(0,network[x-1]+1): # +1 bias
+	                rand =  "%.4f" % float(np.random.sample(1))
+	                temp2.append(rand)
+	            temp1.append(temp2)
+
+	        weights.append(np.asarray(temp1, dtype=float))
+	        
+	return weights

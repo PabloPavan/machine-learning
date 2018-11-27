@@ -34,6 +34,7 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
 
         Jtotal /= len(inputs)
 
+        print("\rJ", Jtotal)
         S = 0
         for layer in range(0, len(network) - 1):
             S += np.sum(np.delete(weights[layer], 0, axis=1) ** 2)
