@@ -1,12 +1,15 @@
 import numpy as np
 from utils import *
 from neural import *
+from metrics import *
+import math
+from sklearn.utils import shuffle
 #import argcomplete, argparse
 
-max_iterations  = 5000
-alpha           = 0.01
+max_iterations  = 1000
+alpha           = 0.1
 epsilon         = 0.0000010000
-num_kfolds      = 2
+num_kfolds      = 10
 
 def main():
     # parser = argparse.ArgumentParser(description='Argument')
@@ -161,6 +164,8 @@ def main():
     lista_kfold_input.append(tempx)
     lista_kfold_predition.append(tempy)
 
+
+
     # print("Conjunto de treinamento")
     # for l in range(0, len(lista_kfold_input)):
     #     print("\tExemplo", l + 1)
@@ -170,6 +175,7 @@ def main():
 
     # build the test data
     k_f = 0
+    f_mes = []
     while k_f != num_kfolds:
         train_input = []
         train_pred = []
@@ -182,13 +188,59 @@ def main():
                     train_input.append(lista_kfold_input[w][j])
                     train_pred.append(lista_kfold_predition[w][j])
 
-        new_weigths  = neural_network(network, weights, regularization, train_input, train_pred, max_iterations,alpha)
+        train_input, train_pred = shuffle(train_input, train_pred, random_state=0)
+        # here! add normalize data
+        #train_input = normalize(np.asarray(train_input))
+        #test_input = normalize(np.asarray(test_input))
+
+        new_weigths = neural_network(network, weights, regularization, train_input, train_pred, max_iterations,alpha)
         k_f += 1
 
-        feedfoward(network, new_weigths, test_input, test_pred)
+        a = feedfoward(network, new_weigths, test_input, test_pred)
+
+        class1 = np.array(([1],[0]))
+        class2 = np.array(([0],[1]))
 
 
+        # print(test_pred[0].shape)
+        # print(a[0].shape)
+        # print(tp.shape)
 
+        confusion_matrix = np.zeros(shape=(2, 2))
+        for j in range(0, len(a)):
+
+            if np.array_equal(class1,a[j]) and np.array_equal(test_pred[j],a[j]):
+                confusion_matrix[0][0] += 1
+            elif np.array_equal(class2,a[j]) and np.array_equal(test_pred[j],a[j]):
+                confusion_matrix[1][1] += 1
+            elif np.array_equal(class1, a[j]) and not(np.array_equal(test_pred[j], a[j])):
+                confusion_matrix[0][1] += 1
+            elif np.array_equal(class2, a[j]) and not (np.array_equal(test_pred[j], a[j])):
+                confusion_matrix[1][0] += 1
+
+                # print(confusion_matrix)
+        prec_array = []
+        rec_array = []
+        # calcula prec e rec pra cada coluna
+        for col in range(0, len(confusion_matrix) - 1):
+            conf_matrix_bin = confusion_matrix_bin(confusion_matrix, col)
+            prec_array.append(precision(conf_matrix_bin))
+            rec_array.append(recall(conf_matrix_bin))
+        # media de prec e recal
+        prec, rec = macro_median(prec_array, rec_array)
+        beta = 1
+
+        # calculo da f_measure para a macro median
+        f1 = f_measure(prec, rec, beta)
+        f_mes.append(f1)
+
+    media_fmes = sum(f_mes)/len(f_mes)
+    print("media:", media_fmes)
+    for q in range(0, len(f_mes)):
+        variancia = math.pow(f_mes[q] - media_fmes, 2) / len(f_mes)
+    print("variancia:", variancia)
+    desvio_padrao = math.sqrt(variancia)
+    print("desvio padrao", desvio_padrao)
 
 if __name__ == "__main__":
 

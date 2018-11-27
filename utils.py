@@ -1,10 +1,17 @@
 import numpy as np
-
+import random
 def f(x):
-	return x + x + x
+	return x+np.sin(x)
 
 def sig(x):
 	return 1/(1+np.exp(-1*f(x)))
+
+def tanh(x):
+	return 2*sig(2*x)-1
+
+def reLu(x):
+	return f(x)*(f(x) > 0)
+
 
 def numVer(A):
 	return (f(A + epsilon) - f(A - epsilon)) / (2 * epsilon)
@@ -40,20 +47,7 @@ def print3D(A):
 	return s
 
 def normalize(data):
-	return  data/data.max(axis=0)
+
+	return (data-data.min(axis=0))/(data.max(axis=0)-data.min(axis=0))
 
 
-def major_voting(result_data, dict):
-    count = result_data.count(dict[0])
-    index = 0
-    for i in range(0, len(dict)):
-        if count <= result_data.count(dict[i]):
-            index = i
-    return dict[index]
-
-def k_folds(dataset, i, k):
-    n = len(dataset)
-    data_test = dataset[n*(i-1)//k:n*i//k]
-    data_train = dataset.drop(dataset.index[n*(i-1)//k:n*i//k])
-
-    return data_train, data_test

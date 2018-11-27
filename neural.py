@@ -1,7 +1,7 @@
 import numpy as np
 from utils import *
 
-
+epsilon = 0.00001
 def neural_network(network, weights, regularization, inputs, predictions, max_iterations, alpha):
     iterations = 0
     while iterations < max_iterations:
@@ -26,8 +26,10 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
             layer = layer + 1
             input_propagate[example].append(np.array(sig(z), ndmin=2))
 
-            J = -1 * predictions[example] * np.log(input_propagate[example][layer]) - (
-                        1 - predictions[example]) * np.log(1 - input_propagate[example][layer])
+            # -np.average(y * np.log(p) + (1 - y) * np.log(1 - p))
+            # J = log_loss + regTerm * np.linalg.norm(theta[1:]) / (2 * m)
+
+            J = -1*predictions[example]*np.log(input_propagate[example][layer]+epsilon)-(1-predictions[example])*np.log(1-input_propagate[example][layer]+epsilon)
             Jtotal += np.sum(J)
 
         Jtotal /= len(inputs)
@@ -70,21 +72,15 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
             P[layer] = regularization * weightsTemp
             D[layer] = (1 / len(inputs)) * (D[layer] + P[layer])
 
-        # print("\n--------------------------------------------")
-        # print("Rodando verificacao numerica de gradientes (epsilon=" + str(epsilon) + ")")
-        # for layer in range(0, len(network) - 1):
-        # 	Dver = numVer(D[layer])
-        # 	print("Gradientes finais para Theta" + str(layer + 1) + ":\n", print2D(Dver, tab="\t\t"))
-        # 	print(print2D(delta[example]))
 
         for layer in range(0, len(network) - 1):
             weights[layer] = weights[layer] - alpha * D[layer]
-    # 	print("Theta", layer + 1, "inicial (pesos de cada neuronio, incluindo bias, armazenados nas linhas):\n", print2D(weights[layer]))
     return weights
 
 
 def feedfoward(network, weights, inputs, predictions):
     input_propagate = []
+    output = []
     for example in range(0, len(inputs)):
 
         input_propagate.append([])
@@ -101,7 +97,9 @@ def feedfoward(network, weights, inputs, predictions):
         layer = layer + 1
         input_propagate[example].append(np.array(sig(z), ndmin=2))
 
-    print("\tSaida predita para o exemplo", example + 1, ":", print1D(input_propagate[example][layer]))
-    print("\tSaida esperada para o exemplo", example + 1, ":", print1D(predictions[example]))
+        input_propagate[example][layer] = np.around(input_propagate[example][layer])
 
-    return 0
+        # print("\tSaida predita para o exemplo :", print1D(input_propagate[example][layer]))
+        # print("\tSaida esperada para o exemplo :", print1D(predictions[example]))
+        output.append(input_propagate[example][layer])
+    return output
