@@ -8,7 +8,7 @@ import time
 import sys
 import csv
 
-max_iterations  = 1
+max_iterations  = 5000
 epsilon         = 0.0000010000
 num_kfolds      = 10
 
@@ -30,7 +30,6 @@ def main():
 
     inputs = []
     predictions = []
-
 
     fdataset = open("data/ionosphere.data", "r")
 
@@ -120,10 +119,8 @@ def main():
     k_f = 0
     f_mes = []
     while k_f != num_kfolds:
-        weights=build_weights(network)
-
         
-
+        weights=build_weights(network)
         train_input = []
         train_pred = []
         test_pred = lista_kfold_predition[k_f]
@@ -161,7 +158,7 @@ def main():
             elif np.array_equal(class2, a[j]) and not (np.array_equal(test_pred[j], a[j])):
                 confusion_matrix[1][0] += 1
 
-        #print(confusion_matrix)
+        print(confusion_matrix)
 
         prec_array = []
         rec_array = []

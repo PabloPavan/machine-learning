@@ -6,16 +6,14 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
     iterations = 0
     Jtotal = 0
     while iterations < max_iterations:
-        iterations = iterations + 1
+        iterations = iterations+1
         # print("\r Iteration", iterations)
 
-
-        
         input_propagate = []
         prev_J = Jtotal 
         for example in range(0, len(inputs)):
             input_propagate.append([])
-            for layer in range(0, len(network) - 1):
+            for layer in range(0, len(network)-1):
                 if layer == 0:
                     input_propagate[example].append(np.array(inputs[example], ndmin=2))
                 else:
@@ -34,25 +32,25 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
             J = -1*predictions[example]*np.log(input_propagate[example][layer]+epsilon)-(1-predictions[example])*np.log(1-input_propagate[example][layer]+epsilon)
             Jtotal += np.sum(J)
 
-        Jtotal /= len(inputs)
+        Jtotal/=len(inputs)
 
         S = 0
-        for layer in range(0, len(network) - 1):
-            S += np.sum(np.delete(weights[layer], 0, axis=1) ** 2)
-        S = regularization / (2 * len(inputs)) * S
+        for layer in range(0, len(network)-1):
+            S += np.sum(np.delete(weights[layer], 0, axis=1)**2)
+        S = regularization/(2*len(inputs))*S
         
 
         Jtotal = Jtotal+S 
-        if abs(Jtotal - prev_J) <= 0.0001:
+        if abs(prev_J-Jtotal) <= 0.00001:
             max_iterations = iterations
             # print("iterations:", iterations)
-            # print("J", Jtotal+S)
+            # print("J", Jtotal)
             # print("Prev J", prev_J)
-
+            # print("Error", abs(prev_J-Jtotal))
 
         delta = []
         D = []
-        for layer in range(0, len(network) - 1):
+        for layer in range(0, len(network)-1):
             D.append(np.zeros(weights[layer].shape))
 
         for example in range(0, len(inputs)):
@@ -61,31 +59,31 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
             for layer in range(0, len(network)):
                 delta[example].append([])
 
-            delta[example][layer] = input_propagate[example][layer] - predictions[example]
+            delta[example][layer] = input_propagate[example][layer]-predictions[example]
 
-            for layer in reversed(range(1, len(network) - 1)):
+            for layer in reversed(range(1, len(network)-1)):
                 delta[example][layer] = np.dot(weights[layer].T, delta[example][layer + 1]) * input_propagate[example][
-                    layer] * (1 - input_propagate[example][layer])
+                    layer]*(1 - input_propagate[example][layer])
                 delta[example][layer] = np.delete(delta[example][layer], 0)
                 delta[example][layer] = np.array(delta[example][layer], ndmin=2).T
 
-            for layer in reversed(range(0, len(network) - 1)):
-                Dtemp = np.dot(delta[example][layer + 1], input_propagate[example][layer].T)
-                D[layer] = D[layer] + Dtemp
+            for layer in reversed(range(0, len(network)-1)):
+                Dtemp = np.dot(delta[example][layer+1], input_propagate[example][layer].T)
+                D[layer] = D[layer]+Dtemp
 
         P = []
-        for layer in range(0, len(network) - 1):
+        for layer in range(0, len(network)-1):
             P.append([])
 
-        for layer in range(0, len(network) - 1):
+        for layer in range(0, len(network)-1):
             weightsTemp = weights[layer].copy()
             weightsTemp[:, 0] = 0
-            P[layer] = regularization * weightsTemp
-            D[layer] = (1 / len(inputs)) * (D[layer] + P[layer])
+            P[layer] = regularization*weightsTemp
+            D[layer] = (1/len(inputs))*(D[layer]+P[layer])
 
 
-        for layer in range(0, len(network) - 1):
-            weights[layer] = weights[layer] - alpha * D[layer]
+        for layer in range(0,len(network)-1):
+            weights[layer]=weights[layer]-alpha*D[layer]
     return weights
 
 
@@ -95,7 +93,7 @@ def feedfoward(network, weights, inputs, predictions):
     for example in range(0, len(inputs)):
 
         input_propagate.append([])
-        for layer in range(0, len(network) - 1):
+        for layer in range(0, len(network)-1):
             if layer == 0:
                 input_propagate[example].append(np.array(inputs[example], ndmin=2))
             else:
