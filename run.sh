@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 # lambda: 0.01
 # rede: [33, 4, 2]
@@ -16,13 +16,10 @@
 
 run ()
 {
-	python3 main_ionosphere.py net_io.txt | awk -vORS=, '{ print $2 }' | sed 's/,$/\n/'
+	HOST=`echo $HOSTNAME`
+	OUTUPT=`python3 main_ionosphere.py net.txt | awk -vORS=, '{ print $2 }' | sed 's/,$/\n/'` 
+	echo "$1,$2,"$OUTUPT >> $HOST"_"$DATE"_"ionosphere.csv
 }
-
-
-
-
-
 
 wrtitefile () 
 { 
@@ -35,21 +32,19 @@ wrtitefile ()
 	echo "2" >> net.txt
 } 
 
-echo "lambda,neural,alpha,media,variancia,desvio_padrao,tempo" > saida.txt
+HOST=`hostname`
+DATE=`date "+%d%m%Y-%H%M%S"`
+
+echo "layers,neuron,lambda,alpha,f1_mean,variance,standard_deviation,time_execution" > $HOST"_"$DATE"_"ionosphere.csv
 
 for lambda in 0 0.1; do 
 	for alpha in 0.001 0.01; do 
 		for layers in 1 4; do
 	 		for neuron in 2 16 ; do 
 	 	    	wrtitefile $lambda $alpha $layers $neuron
-	 	    	run 
+	 	    	run $layers $neuron
 	 		done
 	 	done
 	done
 done
 
-
-
-#run comands to csv
-#python3 main_ionosphere.py net_io.txt | awk -vORS=, '{ print $2 }' | sed 's/,$/\n/'
-#0.01,0.01,0.387637362637,0.01313066809564061,0.11458912730115632,0.216017484664917
