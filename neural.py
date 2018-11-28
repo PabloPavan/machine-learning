@@ -7,10 +7,11 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
     Jtotal = 0
     while iterations < max_iterations:
         iterations = iterations+1
-        # print("\r Iteration", iterations)
+#        print("\r Iteration", iterations)
 
         input_propagate = []
         prev_J = Jtotal 
+        Jtotal = 0
         for example in range(0, len(inputs)):
             input_propagate.append([])
             for layer in range(0, len(network)-1):
@@ -41,7 +42,7 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
         
 
         Jtotal = Jtotal+S 
-        if abs(prev_J-Jtotal) <= 0.00001:
+        if iterations > 1 and abs(prev_J-Jtotal) <= 0.00001:
             max_iterations = iterations
             # print("iterations:", iterations)
             # print("J", Jtotal)
@@ -84,6 +85,7 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
 
         for layer in range(0,len(network)-1):
             weights[layer]=weights[layer]-alpha*D[layer]
+
     return weights
 
 
