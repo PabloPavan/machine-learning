@@ -1,7 +1,7 @@
 import numpy as np
 from utils import *
-import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib
+# import matplotlib.pyplot as plt
 
 epsilon = 0.00001
 def neural_network(network, weights, regularization, inputs, predictions, max_iterations, alpha):
@@ -43,9 +43,9 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
         S = regularization/(2*len(inputs))*S
         
 
-        plt.scatter(iterations, Jtotal+S, c="g")
-        plt.pause(0.001)
-        plt.draw()
+#         plt.scatter(iterations, Jtotal+S, c="g")
+#         plt.pause(0.001)
+#         plt.draw()
         #plt.pause(0.05)
         Jtotal = Jtotal+S 
             # print("iterations:", iterations)
