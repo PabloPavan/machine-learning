@@ -1,5 +1,7 @@
 import numpy as np
 from utils import *
+import matplotlib
+import matplotlib.pyplot as plt
 
 epsilon = 0.00001
 def neural_network(network, weights, regularization, inputs, predictions, max_iterations, alpha):
@@ -34,16 +36,18 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
             Jtotal += np.sum(J)
 
         Jtotal/=len(inputs)
-
+        
         S = 0
         for layer in range(0, len(network)-1):
             S += np.sum(np.delete(weights[layer], 0, axis=1)**2)
         S = regularization/(2*len(inputs))*S
         
 
+        plt.scatter(iterations, Jtotal+S, c="g")
+        plt.pause(0.001)
+        plt.draw()
+        #plt.pause(0.05)
         Jtotal = Jtotal+S 
-        if iterations > 1 and abs(prev_J-Jtotal) <= 0.00001:
-            max_iterations = iterations
             # print("iterations:", iterations)
             # print("J", Jtotal)
             # print("Prev J", prev_J)
@@ -63,8 +67,7 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
             delta[example][layer] = input_propagate[example][layer]-predictions[example]
 
             for layer in reversed(range(1, len(network)-1)):
-                delta[example][layer] = np.dot(weights[layer].T, delta[example][layer + 1]) * input_propagate[example][
-                    layer]*(1 - input_propagate[example][layer])
+                delta[example][layer] = np.dot(weights[layer].T,delta[example][layer + 1])*input_propagate[example][layer]*(1 - input_propagate[example][layer])
                 delta[example][layer] = np.delete(delta[example][layer], 0)
                 delta[example][layer] = np.array(delta[example][layer], ndmin=2).T
 
@@ -86,6 +89,10 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
         for layer in range(0,len(network)-1):
             weights[layer]=weights[layer]-alpha*D[layer]
 
+
+        if iterations > 1 and abs(prev_J-Jtotal) <= 0.00005:
+            max_iterations = iterations
+
     return weights
 
 
@@ -93,7 +100,6 @@ def feedfoward(network, weights, inputs, predictions):
     input_propagate = []
     output = []
     for example in range(0, len(inputs)):
-
         input_propagate.append([])
         for layer in range(0, len(network)-1):
             if layer == 0:

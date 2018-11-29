@@ -56,7 +56,7 @@ def neural_network(network,weights,regularization,inputs, predictions, max_itera
 		delta = []
 		D = []
 		for layer in range(0, len(network) - 1):
-				D.append(np.zeros(weights[layer].shape))
+			D.append(np.zeros(weights[layer].shape))
 
 		for example in range(0, len(inputs)):
 			print("\tCalculando gradientes com base no exemplo", example + 1)

@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 def f(x):
 	return x
 
@@ -11,7 +12,6 @@ def tanh(x):
 
 def reLu(x):
 	return f(x)*(f(x) > 0)
-
 
 def numVer(A):
 	return (f(A + epsilon) - f(A - epsilon)) / (2 * epsilon)
@@ -59,7 +59,11 @@ def build_weights(network):
 	        for y in range(0, network[x]): #valores para cada um dos neuronios 
 	            temp2 = []
 	            for z in range(0,network[x-1]+1): # +1 bias
-	                rand =  "%.4f" % float(np.random.sample(1))
+	                #rand =  "%.4f" % float(np.random.sample(1))
+	                r = 4*(math.sqrt(6/(network[0]+network[len(network)-1])))
+	                rand = random.uniform(-r,r)
+
+
 	                temp2.append(rand)
 	            temp1.append(temp2)
 
