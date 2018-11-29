@@ -136,7 +136,7 @@ def feedfoward(network, weights, inputs, predictions):
                 input_propagate[example][layer][1] = 0
                 input_propagate[example][layer][2] = 1
 
-        print("\tSaida predita para o exemplo :", print1D(input_propagate[example][layer]))
-        print("\tSaida esperada para o exemplo :", print1D(predictions[example]))
+#         print("\tSaida predita para o exemplo :", print1D(input_propagate[example][layer]))
+#         print("\tSaida esperada para o exemplo :", print1D(predictions[example]))
         output.append(input_propagate[example][layer])
     return output
