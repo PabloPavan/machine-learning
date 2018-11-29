@@ -8,11 +8,11 @@
 # desvio_padrao: 0.13799410054094552
 # tempo: 0.21584486961364746
 
-#create csv 
+#create csv
 
-#echo"lambda,rede,alpha,media,variancia,desvio_padrao,tempo" > output.csv 
+#echo"lambda,rede,alpha,media,variancia,desvio_padrao,tempo" > output.csv
 
-#create file of network 
+#create file of network
 
 run ()
 {
@@ -37,9 +37,9 @@ DATE=`date "+%d%m%Y-%H%M%S"`
 
 echo "layers,neuron,lambda,alpha,f1_mean,variance,standard_deviation,time_execution" > $HOST"_"$DATE"_"ionosphere.csv
 
-for lambda in 0 0.1; do 
-	for alpha in 0.001 0.01; do 
-		for layers in 1 4; do
+for lambda in 0 0.1; do
+	for alpha in 0.001 0.01; do
+		for layers in 1; do
 	 		for neuron in 2 16 ; do 
 	 	    	wrtitefile $lambda $alpha $layers $neuron
 	 	    	run $layers $neuron
