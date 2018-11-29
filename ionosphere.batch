@@ -2,6 +2,7 @@
 #SBATCH -p shared
 #SBATCH -n 1
 #SBATCH -J ionosphere
+#SBATCH -t 24:00:00
 
 mkdir -p result
 mkdir -p result/ionosphere
