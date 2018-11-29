@@ -8,9 +8,9 @@ import time
 import sys
 import csv
 
-max_iterations  = 1000
+max_iterations  = 500
 epsilon         = 0.0000010000
-num_kfolds      = 2
+num_kfolds      = 10
 
 def main():
 
@@ -31,7 +31,7 @@ def main():
     inputs = []
     predictions = []
 
-    fdataset = open("data/ionosphere.data", "r")
+    fdataset = open("data/breast-cancer-wisconsin.data", "r")
 
     i = 0
     for l in fdataset:
@@ -136,11 +136,10 @@ def main():
 
         train_input, train_pred = shuffle(train_input, train_pred)
         test_input, test_pred = shuffle(test_input, test_pred)
-
         # here! add normalize data
         train_input = normalize(np.asarray(train_input))
         test_input = normalize(np.asarray(test_input))
-
+        # print(print2D(test_input),print2D(test_pred))
         new_weigths = neural_network(network, weights, regularization, train_input, train_pred, max_iterations,alpha)
         k_f += 1
 
