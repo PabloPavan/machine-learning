@@ -90,7 +90,7 @@ def neural_network(network, weights, regularization, inputs, predictions, max_it
             weights[layer]=weights[layer]-alpha*D[layer]
 
 
-        if iterations > 1 and abs(prev_J-Jtotal) <= 0.00005:
+        if iterations > 1 and abs(prev_J-Jtotal) <= 0.0001:
             max_iterations = iterations
 
     return weights
@@ -136,7 +136,7 @@ def feedfoward(network, weights, inputs, predictions):
                 input_propagate[example][layer][1] = 0
                 input_propagate[example][layer][2] = 1
 
-        # print("\tSaida predita para o exemplo :", print1D(input_propagate[example][layer]))
-        # print("\tSaida esperada para o exemplo :", print1D(predictions[example]))
+        print("\tSaida predita para o exemplo :", print1D(input_propagate[example][layer]))
+        print("\tSaida esperada para o exemplo :", print1D(predictions[example]))
         output.append(input_propagate[example][layer])
     return output

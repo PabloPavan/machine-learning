@@ -8,7 +8,7 @@ import time
 import sys
 import csv
 
-max_iterations  = 1000
+max_iterations  = 500
 epsilon         = 0.0000010000
 num_kfolds      = 2
 
@@ -31,7 +31,7 @@ def main():
     inputs = []
     predictions = []
 
-    fdataset = open("data/ionosphere.data", "r")
+    fdataset = open("data/wine.data", "r")
 
     i = 0
     for l in fdataset:
@@ -55,16 +55,26 @@ def main():
 
     class1 = 0
     class2 = 0
+    class3 = 0
     l_class = []
 
+    class1_ver = np.array(([1],[0],[0]))
+    class2_ver = np.array(([0],[1],[0]))
+    class3_ver = np.array(([0],[0],[1]))
+
+    
     for v_pred in predictions:
-        if [[1, 0]] in v_pred.T:
+        if np.array_equal(class1_ver,v_pred):
             class1 += 1
-    class2 = len(predictions)-class1
+        if np.array_equal(class2_ver,v_pred):
+            class2 += 1
+    class3 = len(predictions)-class1-class2
     l_class.append(class1)
     l_class.append(class2)
+    l_class.append(class3)
 
-    for valor in range(0, 2):
+
+    for valor in range(0, 3):
         l_class[valor] = int(l_class[valor]/num_kfolds)
 
 
@@ -72,15 +82,25 @@ def main():
     line_class1 = []
     count_class2 = 0
     line_class2 = []
+    count_class3 = 0
+    line_class3 = []
 
 
     for v_pred in predictions:
-        if [[1, 0]] in v_pred.T:
+        if np.array_equal(class1_ver,v_pred):
             line_class1.append(count_class1)
         count_class1 += 1
-        if [[0, 1]] in v_pred.T:
+        if np.array_equal(class2_ver,v_pred):
             line_class2.append(count_class2)
         count_class2 += 1
+        if np.array_equal(class3_ver,v_pred):
+            line_class3.append(count_class3)
+        count_class3 += 1
+
+
+    # print("1",line_class1)
+    # print("2",line_class2)
+    # print("3",line_class3)
 
     lista_kfold_input =[]
     lista_kfold_predition =[]
@@ -98,6 +118,11 @@ def main():
             tempx.append(inputs[line_class2[line]])
             tempy.append(predictions[line_class2[line]])
             line_class2.remove(line_class2[line])
+        for k in range(0, l_class[2]):
+            line = np.random.randint(0, len(line_class3))
+            tempx.append(inputs[line_class3[line]])
+            tempy.append(predictions[line_class3[line]])
+            line_class3.remove(line_class3[line])
         lista_kfold_input.append(tempx)
         lista_kfold_predition.append(tempy)
 
@@ -109,6 +134,9 @@ def main():
     for i in range(0, len(line_class2)):
         tempx.append(inputs[line_class2[i]])
         tempy.append(predictions[line_class2[i]])
+    for i in range(0, len(line_class3)):
+        tempx.append(inputs[line_class3[i]])
+        tempy.append(predictions[line_class3[i]])
 
     lista_kfold_input.append(tempx)
     lista_kfold_predition.append(tempy)
@@ -117,7 +145,7 @@ def main():
     f_mes = []
     
     while k_f != num_kfolds:
-
+        
         weights=build_weights(network)
         
         train_input = []
@@ -133,33 +161,55 @@ def main():
 
         train_input, train_pred = shuffle(train_input, train_pred)
         test_input, test_pred = shuffle(test_input, test_pred)
-
         # here! add normalize data
         train_input = normalize(np.asarray(train_input))
         test_input = normalize(np.asarray(test_input))
-
+        # print(print2D(test_input),print2D(test_pred))
         new_weigths = neural_network(network, weights, regularization, train_input, train_pred, max_iterations,alpha)
         k_f += 1
 
         results = feedfoward(network, new_weigths, test_input, test_pred)
 
-        class1 = np.array(([1],[0]))
-        class2 = np.array(([0],[1]))
+
+        confusion_matrix = np.zeros(shape=(3, 3))
+
+        for k in range(0, len(results)):
+            for i in range(0, len(results[k])):
+                if results[k][i] == 1:
+                    break
+
+            for j in range(0, len(test_pred[k])):
+                if test_pred[k][j] == 1:
+                    break
+
+            confusion_matrix[i][j] += 1
 
 
-        confusion_matrix = np.zeros(shape=(2, 2))
-        for j in range(0, len(results)):
+        # for j in range(0, len(results)):
 
-            if np.array_equal(class1,results[j]) and np.array_equal(test_pred[j],results[j]):
-                confusion_matrix[0][0] += 1
-            elif np.array_equal(class2,results[j]) and np.array_equal(test_pred[j],results[j]):
-                confusion_matrix[1][1] += 1
-            elif np.array_equal(class1, results[j]) and not(np.array_equal(test_pred[j], results[j])):
-                confusion_matrix[0][1] += 1
-            elif np.array_equal(class2, results[j]) and not (np.array_equal(test_pred[j], results[j])):
-                confusion_matrix[1][0] += 1
+        #     if np.array_equal(class1_ver,results[j]) and np.array_equal(test_pred[j],results[j]):
+        #         confusion_matrix[0][0] += 1
+        #     elif np.array_equal(class2_ver,results[j]) and np.array_equal(test_pred[j],results[j]):
+        #         confusion_matrix[1][1] += 1
+        #     elif np.array_equal(class3_ver,results[j]) and np.array_equal(test_pred[j],results[j]):
+        #         confusion_matrix[2][2] += 1
+        #     elif not (np.array_equal(class1_ver,results[j])) and np.array_equal(test_pred[j],results[j]):
+        #         if np.array_equal(class2_ver,results[j]):
+        #             confusion_matrix[1][0] += 1
+        #         elif np.array_equal(class3_ver,results[j]):
+        #             confusion_matrix[2][0] += 1
+        #     elif not (np.array_equal(class2_ver,results[j])) and np.array_equal(test_pred[j],results[j]):
+        #         if np.array_equal(class1_ver,results[j]):
+        #             confusion_matrix[0][1] += 1
+        #         elif np.array_equal(class3_ver,results[j]):
+        #             confusion_matrix[2][1] += 1
+        #     elif not (np.array_equal(class3_ver,results[j])) and np.array_equal(test_pred[j],results[j]):
+        #         if np.array_equal(class1_ver,results[j]):
+        #             confusion_matrix[0][2] += 1
+        #         elif np.array_equal(class2_ver,results[j]):
+        #             confusion_matrix[1][2] += 1
 
-#        print(confusion_matrix)
+        print(confusion_matrix)
 
         prec_array = []
         rec_array = []

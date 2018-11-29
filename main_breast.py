@@ -55,19 +55,16 @@ def main():
 
     class1 = 0
     class2 = 0
-    class3 = 0
-    total_class = 2
     l_class = []
 
-    if total_class == 2:
-        for v_pred in predictions:
-            if [[1, 0]] in v_pred.T:
-                class1 += 1
-        class2 = len(predictions)-class1
-        l_class.append(class1)
-        l_class.append(class2)
+    for v_pred in predictions:
+        if [[1, 0]] in v_pred.T:
+            class1 += 1
+    class2 = len(predictions)-class1
+    l_class.append(class1)
+    l_class.append(class2)
 
-    for valor in range(0, total_class):
+    for valor in range(0, 2):
         l_class[valor] = int(l_class[valor]/num_kfolds)
 
 
@@ -76,14 +73,14 @@ def main():
     count_class2 = 0
     line_class2 = []
 
-    if total_class == 2:
-        for v_pred in predictions:
-            if [[1, 0]] in v_pred.T:
-                line_class1.append(count_class1)
-            count_class1 += 1
-            if [[0, 1]] in v_pred.T:
-                line_class2.append(count_class2)
-            count_class2 += 1
+
+    for v_pred in predictions:
+        if [[1, 0]] in v_pred.T:
+            line_class1.append(count_class1)
+        count_class1 += 1
+        if [[0, 1]] in v_pred.T:
+            line_class2.append(count_class2)
+        count_class2 += 1
 
     lista_kfold_input =[]
     lista_kfold_predition =[]
