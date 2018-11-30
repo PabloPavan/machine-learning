@@ -1,0 +1,138 @@
+---
+title: "Analysis"
+author: "Pablo Pavan"
+date: "November 30, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+breast <- read_csv("dev/machine-learning/result/breast/result_breast.csv", col_names = FALSE, col_types = cols(
+        X27 = col_double()))
+breast[2:21] <- NULL
+names(breast) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+
+```
+
+```{r}
+
+selected_values <- function(data, A, B, C, D){
+    # Default Options equal -1 on table
+      ly <- 1
+      ne <- 2
+      la <- 0
+      ap <- 0.01
+
+    # Other Options equal 1 on table
+      if(A==1){
+        ly <- 4
+      }  
+      
+      if(B==1){
+        ne <- 16
+      } 
+
+      if(C==1){
+        la <- 0.001
+      } 
+
+      if(D==1){
+        ap <- 0.1
+      } 
+
+      # The data can have other measurements, filter it
+      value <- data %>% filter(layers==ly,
+                             neurons==ne,
+                           lambda==la,
+                             alpha==ap) 
+
+      return(list(value$Mean, value$Sd))
+
+}
+
+
+alloc_vari_4_fact <- function(data){
+    # Values for the signs table
+    x <- seq(-1, 1, 2)
+
+
+    
+    data %>% group_by(layers, neurons, lambda, alpha) %>% 
+         summarize(N=n(), Mean=mean(time_execution), Sd=sd(time_execution)) -> data_mean
+    
+    print(data_mean)
+
+    d1 <- expand.grid(A = x, B = x, C = x, D = x)
+    d1 %>% rowwise() %>% mutate(AB=A*B,
+              AC=A*C,
+              AD=A*D,
+              BC=B*C,
+              BD=B*D,
+              CD=C*D,
+              ABC=A*B*C,
+              ABD=A*B*D,
+              ACD=A*C*D,
+              BCD=B*C*D,
+              ABCD=A*B*C*D,
+              y = selected_values(data_mean, A, B, C, D)[[1]],
+              sd = selected_values(data_mean, A, B, C, D)[[2]]
+              ) %>% ungroup() -> semi_table 
+
+     semi_table %>% 
+              mutate(xA = A*y,
+                     xB = B*y,
+                     xC = C*y,
+                     xD = D*y,
+                     xAB = AB*y,
+                     xAC = AC*y,
+                     xAD = AD*y,
+                     xBC = BC*y,
+                     xBD = BD*y,
+                     xCD = CD*y,
+                     xABC = ABC*y,          
+                     xABD = ABD*y,
+                     xACD = ACD*y,
+                     xBCD = BCD*y,
+                     xABCD = ABCD*y)  %>%
+            summarize(TA=sum(xA)/16,
+                      TB=sum(xB)/16,
+                      TC=sum(xC)/16,
+                      TD=sum(xD)/16,
+                      TAB=sum(xAB)/16,
+                      TAC=sum(xAC)/16,
+                      TAD=sum(xAD)/16,
+                      TBC=sum(xBC)/16,
+                      TBD=sum(xBD)/16,
+                      TCD=sum(xCD)/16,
+                      TABC=sum(xABC)/16,
+                      TABD=sum(xABD)/16,
+                      TACD=sum(xACD)/16,
+                      TBCD=sum(xBCD)/16,
+                      TABCD=sum(xABCD)/16
+                      
+    ) %>% data.frame() -> qs
+
+    qs_vector <- as.numeric(qs[1,])
+
+    sum(qs_vector^2)*16 -> total
+
+    (qs_vector^2*16) / total * 100 -> influ
+
+    semi_table$y <- sprintf("%.2f", semi_table$y)
+    semi_table$sd <- sprintf("%.2f", semi_table$sd)
+
+    semi_table %>% data.frame() -> sing
+
+    x <- c(sprintf("%.2f", qs_vector), "", "")
+    f <- c(sprintf(" %.2f%% ", influ), "", "")
+
+    result <- rbind(rbind(sing, x), f)
+    return(result)
+}
+
+```
+
