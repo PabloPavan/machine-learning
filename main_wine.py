@@ -8,9 +8,9 @@ import time
 import sys
 import csv
 
-max_iterations  = 500
+max_iterations  = 1000
 epsilon         = 0.0000010000
-num_kfolds      = 2
+num_kfolds      = 10
 
 def main():
 
