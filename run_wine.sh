@@ -12,8 +12,8 @@
 
 for lambda in 0 0.001; do
 	for alpha in 0.01 0.1; do
-		for layers in 1 4; do
-	 		for neuron in 2 16; do 
+		for layers in 2 3; do
+	 		for neuron in 4 8; do 
 	 	    	sbatch wine.batch $lambda $alpha $layers $neuron
 	 		done
 	 	done
