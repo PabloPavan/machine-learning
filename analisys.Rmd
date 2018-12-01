@@ -5,18 +5,21 @@ date: "November 30, 2018"
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
-library(readr)
-breast <- read_csv("dev/machine-learning/result/breast/result_breast.csv", col_names = FALSE, col_types = cols(
-        X27 = col_double()))
-breast[2:21] <- NULL
-names(breast) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+## load the library
 
+```{r}
+library(gridExtra)
+library(readr)
+library(ggplot2)
+library("dplyr", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
+library("tidyr", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
 ```
+## Functions 2kn
 
 ```{r}
 
@@ -37,7 +40,7 @@ selected_values <- function(data, A, B, C, D){
       } 
 
       if(C==1){
-        la <- 0.001
+        la <- 0.1
       } 
 
       if(D==1){
@@ -62,7 +65,7 @@ alloc_vari_4_fact <- function(data){
 
     
     data %>% group_by(layers, neurons, lambda, alpha) %>% 
-         summarize(N=n(), Mean=mean(time_execution), Sd=sd(time_execution)) -> data_mean
+         summarize(N=n(), Mean=mean(f1_mean), Sd=sd(f1_mean)) -> data_mean
     
     print(data_mean)
 
@@ -133,6 +136,112 @@ alloc_vari_4_fact <- function(data){
     result <- rbind(rbind(sing, x), f)
     return(result)
 }
-
 ```
+
+##read the results
+
+```{r}
+
+setwd("~/dev/machine-learning")
+breast <- read_csv("result/breast/results_breast.csv", col_names = FALSE, col_types = cols(
+        X27 = col_double()))
+breast[2:21] <- NULL
+names(breast) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+
+pima <- read_csv("result/pima/results_pima.csv", col_names = FALSE, col_types = cols(
+        X27 = col_double()))
+pima[2:21] <- NULL
+names(pima) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+
+wine <- read_csv("result/wine/results_wine.csv", col_names = FALSE, col_types = cols(
+        X37 = col_double()))
+wine[2:31] <- NULL
+names(wine) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+
+ionosphere <- read_csv("result/ionosphere/results_ionosphere.csv", col_names = FALSE, col_types = cols(
+        X7 = col_double()))
+names(ionosphere) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+```
+
+## mean f1 
+```{r}
+breast %>% group_by(network, lambda, alpha) %>% 
+         summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_breast
+
+pima %>% group_by(network, lambda, alpha) %>% 
+         summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_pima
+
+wine %>% group_by(network, lambda, alpha) %>% 
+         summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_wine
+
+ionosphere %>% group_by(network, lambda, alpha) %>% 
+         summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_ionosphere
+```
+
+## the best f1 
+```{r}
+max(table_mean_breast$Mean_f1)
+max(table_mean_pima$Mean_f1)
+max(table_mean_wine$Mean_f1)
+max(table_mean_ionosphere$Mean_f1)
+```
+
+The best F1 measure was 0.9763564, 0.8129781, 0.9650899 and 0.9231376 for breast, pima, wine and ionosphere datasets respectively. 
+
+## which config is the beast
+
+```{r}
+subset(table_mean_breast, Mean_f1 == max(Mean_f1)) 
+subset(table_mean_pima, Mean_f1 == max(Mean_f1))
+subset(table_mean_wine, Mean_f1 == max(Mean_f1))
+subset(table_mean_ionosphere, Mean_f1 == max(Mean_f1))
+```
+The best config was always using lambda and alpha = 0.1 and the network config was 2 layers and 16 neurons for breast, 1 layers and 16 neurons for pima, 1 layers and 16 neurons for wine and 3 layers and 16 neurons for ionosphere. 
+
+
+## Join datasets for ggplot 
+
+```{r}
+a <- subset(table_mean_breast, Mean_f1 == max(Mean_f1))
+a['dataset'] = "Breast"
+b <-subset(table_mean_pima, Mean_f1 == max(Mean_f1))
+b['dataset'] = "Pima"
+c <- subset(table_mean_wine, Mean_f1 == max(Mean_f1))
+c['dataset'] = "Wine"
+d <-subset(table_mean_ionosphere, Mean_f1 == max(Mean_f1))
+d['dataset'] = "Ionosphere"
+
+total_dataset <- rbind(a,b,c,d)
+total_dataset$meta <- paste(total_dataset$lambda,"+",total_dataset$alpha)
+total_dataset
+```
+
+```{r}
+g <- ggplot(total_dataset, aes(x= dataset, y =Mean_f1, fill=as.factor(network))) +
+geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin=Mean_f1-Sd, ymax=Mean_f1+Sd), width=.1) +
+  labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network")
+
+g
+```
+
+Here! the plot the best f1 and config.
+
+
+## sperate network column
+```{r}
+breast %>% separate(network, c("layers", "neurons")) -> breast
+pima %>% separate(network, c("layers", "neurons")) -> pima
+wine %>% separate(network, c("layers", "neurons")) -> wine
+ionosphere %>% separate(network, c("layers", "neurons")) -> ionosphere
+```
+## 2kn table genarate 
+```{r include=FALSE}
+breast_2kn <- alloc_vari_4_fact(breast)
+pima_2kn <- alloc_vari_4_fact(pima)
+winet_2kn <- alloc_vari_4_fact(wine)
+ionosphere_2kn <- alloc_vari_4_fact(ionosphere)
+```
+
+
 
