@@ -10,7 +10,7 @@
 
 # echo "network,lambda,alpha,f1_mean,variance,standard_deviation,time_execution" > $HOST"_"$DATE"_"ionosphere.csv
 
-for lambda in 0.1; do
+for lambda in 0 0.1 0.001; do
         for alpha in 0.01 0.1; do
                 for layers in 1 2 3 4; do
                         for neuron in 2 4 8 16; do
