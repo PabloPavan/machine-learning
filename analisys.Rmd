@@ -241,7 +241,8 @@ total_dataset
 beast_f1<- ggplot(total_dataset, aes(x= dataset, y =mean_f1, fill=as.factor(network))) +
 geom_bar(stat = "identity", position = "dodge") +
   geom_errorbar(aes(ymin=mean_f1-f1_sd, ymax=mean_f1+f1_sd), width=.1) +
-  labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network")
+  labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network") +
+  theme_bw()
 
 beast_f1
 
@@ -292,7 +293,8 @@ total_dataset
 beast_time<- ggplot(total_dataset, aes(x= dataset, y =mean_f1, fill=as.factor(network))) +
 geom_bar(stat = "identity", position = "dodge") +
   geom_errorbar(aes(ymin=mean_f1-f1_sd, ymax=mean_f1+f1_sd), width=.1) +
-  labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network")
+  labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network") +
+  theme_bw()
 
 beast_time
 
