@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(gridExtra)
+library(readODS)
 library(readr)
 library(ggplot2)
 library("dplyr", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
@@ -181,13 +182,19 @@ ionosphere %>% group_by(network, lambda, alpha) %>%
          summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_ionosphere
 ```
 
-## export mean f1 datasets
+## export f1 and time mean datasets
 
-```{r}
+```{r include=FALSE}
 write.table(table_mean_breast, "result/breast.csv", sep=",", row.names = FALSE)
 write.table(table_mean_pima, "result/pima.csv", sep=",", row.names = FALSE)
 write.table(table_mean_wine, "result/wine.csv", sep=",", row.names = FALSE)
 write.table(table_mean_ionosphere, "result/ionosphere.csv" ,sep=",", row.names = FALSE )
+
+write_ods(table_mean_breast, "result/breast.ods")
+write_ods(table_mean_pima, "result/pima.ods")
+write_ods(table_mean_wine, "result/wine.ods")
+write_ods(table_mean_ionosphere, "result/ionosphere.ods")
+
 ```
 
 
@@ -289,16 +296,19 @@ beast_time
 
 ## Comparing the F1 beast with the F1 beast basead in time lower 
 
- Before  After 
-830.1701 623.2053  = 206,9648
-1176.831 1079.1647 = 97,6663
-280.7203 256.5248 = 24,1955
-1083.339 828.5699	= 254,7691
+```{r}
+#  Before  After 
+# 830.1701 623.2053  = 206,9648
+# 1176.831 1079.1647 = 97,6663
+# 280.7203 256.5248 = 24,1955
+# 1083.339 828.5699	= 254,7691
+# 
+# 0.9763564 0.97492 = 0,0014364
+# 0.8129781 0.8084253 = 0,0045528
+# 0.9650899 0.9510885 = 0,0140014
+# 0.9231376 0.9137515 = 0,0093861
+```
 
-0.9763564 0.97492 = 0,0014364
-0.8129781 0.8084253 = 0,0045528
-0.9650899 0.9510885 = 0,0140014
-0.9231376 0.9137515 = 0,0093861
 
 Using the best config time we reduced the time execution in 206,9648, 97,6663, 24,1955 and 254,7691, and the F1 difference between using the best config F1 to best config time was 0,0014364, 0,0045528, 0,0140014 and 0,0093861 for breast, Inosphere, Pima and Wine datasets respectively. 
 
@@ -309,6 +319,7 @@ pima %>% separate(network, c("layers", "neurons")) -> pima
 wine %>% separate(network, c("layers", "neurons")) -> wine
 ionosphere %>% separate(network, c("layers", "neurons")) -> ionosphere
 ```
+
 ## 2kn table genarate 
 ```{r include=FALSE}
 breast_2kn <- alloc_vari_4_fact(breast)
@@ -317,5 +328,17 @@ winet_2kn <- alloc_vari_4_fact(wine)
 ionosphere_2kn <- alloc_vari_4_fact(ionosphere)
 ```
 
+
+```{r include=FALSE}
+write.table(breast_2kn, "result/breast_2kn.csv", sep=",", row.names = FALSE)
+write.table(pima_2kn, "result/pima_2kn.csv", sep=",", row.names = FALSE)
+write.table(winet_2kn, "result/wine_2kn.csv", sep=",", row.names = FALSE)
+write.table(ionosphere_2kn, "result/ionosphere_2kn.csv" ,sep=",", row.names = FALSE )
+
+write_ods(breast_2kn, "result/breast_2kn.ods")
+write_ods(pima_2kn, "result/pima_2kn.ods")
+write_ods(winet_2kn, "result/wine_2kn.ods")
+write_ods(ionosphere_2kn, "result/ionosphere_2kn.ods")
+```
 
 
