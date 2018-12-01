@@ -178,6 +178,16 @@ ionosphere %>% group_by(network, lambda, alpha) %>%
          summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_ionosphere
 ```
 
+## export mean f1 datasets
+
+```{r}
+write.table(table_mean_breast, "result/breast.csv", sep=",", row.names = FALSE)
+write.table(table_mean_pima, "result/pima.csv", sep=",", row.names = FALSE)
+write.table(table_mean_wine, "result/wine.csv", sep=",", row.names = FALSE)
+write.table(table_mean_ionosphere, "result/ionosphere.csv" ,sep=",", row.names = FALSE )
+```
+
+
 ## the best f1 
 ```{r}
 max(table_mean_breast$Mean_f1)

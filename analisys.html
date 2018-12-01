@@ -303,6 +303,13 @@ wine %&gt;% group_by(network, lambda, alpha) %&gt;%
 ionosphere %&gt;% group_by(network, lambda, alpha) %&gt;% 
          summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -&gt; table_mean_ionosphere</code></pre>
 </div>
+<div id="export-mean-f1-datasets" class="section level2">
+<h2>export mean f1 datasets</h2>
+<pre class="r"><code>write.table(table_mean_breast, &quot;result/breast.csv&quot;, sep=&quot;,&quot;, row.names = FALSE)
+write.table(table_mean_pima, &quot;result/pima.csv&quot;, sep=&quot;,&quot;, row.names = FALSE)
+write.table(table_mean_wine, &quot;result/wine.csv&quot;, sep=&quot;,&quot;, row.names = FALSE)
+write.table(table_mean_ionosphere, &quot;result/ionosphere.csv&quot; ,sep=&quot;,&quot;, row.names = FALSE )</code></pre>
+</div>
 <div id="the-best-f1" class="section level2">
 <h2>the best f1</h2>
 <pre class="r"><code>max(table_mean_breast$Mean_f1)</code></pre>
