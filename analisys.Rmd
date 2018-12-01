@@ -244,6 +244,10 @@ geom_bar(stat = "identity", position = "dodge") +
   labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network")
 
 beast_f1
+
+png(filename="result/beast_f1.png", width = 600, height = 400)
+plot(beast_f1)
+dev.off()
 ```
 
 Here! the plot the best f1 and config.
@@ -291,6 +295,10 @@ geom_bar(stat = "identity", position = "dodge") +
   labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network")
 
 beast_time
+
+png(filename="result/beast_time.png", width = 600, height = 400)
+plot(beast_time)
+dev.off()
 ```
 
 
