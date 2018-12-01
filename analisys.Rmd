@@ -145,7 +145,10 @@ alloc_vari_4_fact <- function(data){
 setwd("~/dev/machine-learning")
 breast <- read_csv("result/breast/results_breast.csv", col_names = FALSE, col_types = cols(
         X27 = col_double()))
+
 breast[2:21] <- NULL
+row.has.na <- apply(breast, 1, function(x){any(is.na(x))})
+breast <- breast[!row.has.na,]
 names(breast) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
 
 pima <- read_csv("result/pima/results_pima.csv", col_names = FALSE, col_types = cols(
@@ -162,20 +165,20 @@ ionosphere <- read_csv("result/ionosphere/results_ionosphere.csv", col_names = F
         X7 = col_double()))
 names(ionosphere) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
 ```
-
+# Analysis over the F1 measure 
 ## mean f1 
 ```{r}
 breast %>% group_by(network, lambda, alpha) %>% 
-         summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_breast
+         summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_breast
 
 pima %>% group_by(network, lambda, alpha) %>% 
-         summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_pima
+         summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_pima
 
 wine %>% group_by(network, lambda, alpha) %>% 
-         summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_wine
+         summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_wine
 
 ionosphere %>% group_by(network, lambda, alpha) %>% 
-         summarize(Mean_f1=mean(f1_mean), Sd=sd(f1_mean)) -> table_mean_ionosphere
+         summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_ionosphere
 ```
 
 ## export mean f1 datasets
@@ -190,10 +193,10 @@ write.table(table_mean_ionosphere, "result/ionosphere.csv" ,sep=",", row.names =
 
 ## the best f1 
 ```{r}
-max(table_mean_breast$Mean_f1)
-max(table_mean_pima$Mean_f1)
-max(table_mean_wine$Mean_f1)
-max(table_mean_ionosphere$Mean_f1)
+max(table_mean_breast$mean_f1)
+max(table_mean_pima$mean_f1)
+max(table_mean_wine$mean_f1)
+max(table_mean_ionosphere$mean_f1)
 ```
 
 The best F1 measure was 0.9763564, 0.8129781, 0.9650899 and 0.9231376 for breast, pima, wine and ionosphere datasets respectively. 
@@ -201,10 +204,10 @@ The best F1 measure was 0.9763564, 0.8129781, 0.9650899 and 0.9231376 for breast
 ## which config is the beast
 
 ```{r}
-subset(table_mean_breast, Mean_f1 == max(Mean_f1)) 
-subset(table_mean_pima, Mean_f1 == max(Mean_f1))
-subset(table_mean_wine, Mean_f1 == max(Mean_f1))
-subset(table_mean_ionosphere, Mean_f1 == max(Mean_f1))
+subset(table_mean_breast, mean_f1 == max(mean_f1)) 
+subset(table_mean_pima, mean_f1 == max(mean_f1))
+subset(table_mean_wine, mean_f1 == max(mean_f1))
+subset(table_mean_ionosphere, mean_f1 == max(mean_f1))
 ```
 The best config was always using lambda and alpha = 0.1 and the network config was 2 layers and 16 neurons for breast, 1 layers and 16 neurons for pima, 1 layers and 16 neurons for wine and 3 layers and 16 neurons for ionosphere. 
 
@@ -212,31 +215,92 @@ The best config was always using lambda and alpha = 0.1 and the network config w
 ## Join datasets for ggplot 
 
 ```{r}
-a <- subset(table_mean_breast, Mean_f1 == max(Mean_f1))
+a <- subset(table_mean_breast, mean_f1 == max(mean_f1))
 a['dataset'] = "Breast"
-b <-subset(table_mean_pima, Mean_f1 == max(Mean_f1))
+b <-subset(table_mean_pima, mean_f1 == max(mean_f1))
 b['dataset'] = "Pima"
-c <- subset(table_mean_wine, Mean_f1 == max(Mean_f1))
+c <- subset(table_mean_wine, mean_f1 == max(mean_f1))
 c['dataset'] = "Wine"
-d <-subset(table_mean_ionosphere, Mean_f1 == max(Mean_f1))
+d <-subset(table_mean_ionosphere, mean_f1 == max(mean_f1))
 d['dataset'] = "Ionosphere"
 
 total_dataset <- rbind(a,b,c,d)
+rm(a,b,c,d)
 total_dataset$meta <- paste(total_dataset$lambda,"+",total_dataset$alpha)
 total_dataset
 ```
 
 ```{r}
-g <- ggplot(total_dataset, aes(x= dataset, y =Mean_f1, fill=as.factor(network))) +
+beast_f1<- ggplot(total_dataset, aes(x= dataset, y =mean_f1, fill=as.factor(network))) +
 geom_bar(stat = "identity", position = "dodge") +
-  geom_errorbar(aes(ymin=Mean_f1-Sd, ymax=Mean_f1+Sd), width=.1) +
+  geom_errorbar(aes(ymin=mean_f1-f1_sd, ymax=mean_f1+f1_sd), width=.1) +
   labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network")
 
-g
+beast_f1
 ```
 
 Here! the plot the best f1 and config.
 
+# Analysis over the Time Execution
+
+## the best f1 and config 
+```{r}
+
+subset(table_mean_breast, mean_time == min(subset(table_mean_breast, mean_f1 > 0.96)$mean_time))
+
+subset(table_mean_pima, mean_time == min(subset(table_mean_pima, mean_f1 > 0.80)$mean_time))
+
+subset(table_mean_wine, mean_time == min(subset(table_mean_wine, mean_f1 > 0.95)$mean_time))
+
+subset(table_mean_ionosphere, mean_time == min(subset(table_mean_ionosphere, mean_f1 > 0.91)$mean_time))
+
+```
+
+The best F1 measure was 0.97492, 0.8084253, 0.9510885 and 0.9137515 for breast, pima, wine and ionosphere datasets respectively. 
+
+The best config was always using lambda = 0.001 and alpha = 0.1 and the network config was 1 layers and 16 neurons for breast, 1 layers and 16 neurons for pima, 1 layers and 16 neurons for wine. For for ionosphere using lambda = 0.001, alpha = 0.1, 2 layers and 16 neurons.
+
+
+```{r}
+a <- subset(table_mean_breast, mean_time == min(subset(table_mean_breast, mean_f1 > 0.96)$mean_time)) 
+a['dataset'] = "Breast"
+b <-subset(table_mean_pima, mean_time == min(subset(table_mean_pima, mean_f1 > 0.80)$mean_time))
+b['dataset'] = "Pima"
+c <- subset(table_mean_wine, mean_time == min(subset(table_mean_wine, mean_f1 > 0.95)$mean_time))
+c['dataset'] = "Wine"
+d <- subset(table_mean_ionosphere, mean_time == min(subset(table_mean_ionosphere, mean_f1 > 0.91)$mean_time))
+d['dataset'] = "Ionosphere"
+
+total_dataset <- rbind(a,b,c,d)
+rm(a,b,c,d)
+total_dataset$meta <- paste(total_dataset$lambda,"+",total_dataset$alpha)
+total_dataset
+```
+
+```{r}
+beast_time<- ggplot(total_dataset, aes(x= dataset, y =mean_f1, fill=as.factor(network))) +
+geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin=mean_f1-f1_sd, ymax=mean_f1+f1_sd), width=.1) +
+  labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network")
+
+beast_time
+```
+
+
+## Comparing the F1 beast with the F1 beast basead in time lower 
+
+ Before  After 
+830.1701 623.2053  = 206,9648
+1176.831 1079.1647 = 97,6663
+280.7203 256.5248 = 24,1955
+1083.339 828.5699	= 254,7691
+
+0.9763564 0.97492 = 0,0014364
+0.8129781 0.8084253 = 0,0045528
+0.9650899 0.9510885 = 0,0140014
+0.9231376 0.9137515 = 0,0093861
+
+Using the best config time we reduced the time execution in 206,9648, 97,6663, 24,1955 and 254,7691, and the F1 difference between using the best config F1 to best config time was 0,0014364, 0,0045528, 0,0140014 and 0,0093861 for breast, Inosphere, Pima and Wine datasets respectively. 
 
 ## sperate network column
 ```{r}
