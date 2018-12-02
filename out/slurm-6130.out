@@ -1,0 +1,4 @@
+Running on beagle1
+lambda=0.1 alpha=0.01 layers=2 neuron=2
+/home/users/pjpavan/machine-learning/utils.py:51: RuntimeWarning: invalid value encountered in true_divide
+  return (data-data.min(axis=0))/(data.max(axis=0)-data.min(axis=0))

@@ -1,0 +1,354 @@
+---
+title: "Analysis"
+author: "Pablo Pavan"
+date: "November 30, 2018"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## load the library
+
+```{r}
+library(gridExtra)
+library(readODS)
+library(readr)
+library(ggplot2)
+library("dplyr", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
+library("tidyr", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
+```
+## Functions 2kn
+
+```{r}
+
+selected_values <- function(data, A, B, C, D){
+    # Default Options equal -1 on table
+      ly <- 1
+      ne <- 2
+      la <- 0
+      ap <- 0.01
+
+    # Other Options equal 1 on table
+      if(A==1){
+        ly <- 4
+      }  
+      
+      if(B==1){
+        ne <- 16
+      } 
+
+      if(C==1){
+        la <- 0.1
+      } 
+
+      if(D==1){
+        ap <- 0.1
+      } 
+
+      # The data can have other measurements, filter it
+      value <- data %>% filter(layers==ly,
+                             neurons==ne,
+                           lambda==la,
+                             alpha==ap) 
+
+      return(list(value$Mean, value$Sd))
+
+}
+
+
+alloc_vari_4_fact <- function(data){
+    # Values for the signs table
+    x <- seq(-1, 1, 2)
+
+
+    
+    data %>% group_by(layers, neurons, lambda, alpha) %>% 
+         summarize(N=n(), Mean=mean(f1_mean), Sd=sd(f1_mean)) -> data_mean
+    
+    print(data_mean)
+
+    d1 <- expand.grid(A = x, B = x, C = x, D = x)
+    d1 %>% rowwise() %>% mutate(AB=A*B,
+              AC=A*C,
+              AD=A*D,
+              BC=B*C,
+              BD=B*D,
+              CD=C*D,
+              ABC=A*B*C,
+              ABD=A*B*D,
+              ACD=A*C*D,
+              BCD=B*C*D,
+              ABCD=A*B*C*D,
+              y = selected_values(data_mean, A, B, C, D)[[1]],
+              sd = selected_values(data_mean, A, B, C, D)[[2]]
+              ) %>% ungroup() -> semi_table 
+
+     semi_table %>% 
+              mutate(xA = A*y,
+                     xB = B*y,
+                     xC = C*y,
+                     xD = D*y,
+                     xAB = AB*y,
+                     xAC = AC*y,
+                     xAD = AD*y,
+                     xBC = BC*y,
+                     xBD = BD*y,
+                     xCD = CD*y,
+                     xABC = ABC*y,          
+                     xABD = ABD*y,
+                     xACD = ACD*y,
+                     xBCD = BCD*y,
+                     xABCD = ABCD*y)  %>%
+            summarize(TA=sum(xA)/16,
+                      TB=sum(xB)/16,
+                      TC=sum(xC)/16,
+                      TD=sum(xD)/16,
+                      TAB=sum(xAB)/16,
+                      TAC=sum(xAC)/16,
+                      TAD=sum(xAD)/16,
+                      TBC=sum(xBC)/16,
+                      TBD=sum(xBD)/16,
+                      TCD=sum(xCD)/16,
+                      TABC=sum(xABC)/16,
+                      TABD=sum(xABD)/16,
+                      TACD=sum(xACD)/16,
+                      TBCD=sum(xBCD)/16,
+                      TABCD=sum(xABCD)/16
+                      
+    ) %>% data.frame() -> qs
+
+    qs_vector <- as.numeric(qs[1,])
+
+    sum(qs_vector^2)*16 -> total
+
+    (qs_vector^2*16) / total * 100 -> influ
+
+    semi_table$y <- sprintf("%.2f", semi_table$y)
+    semi_table$sd <- sprintf("%.2f", semi_table$sd)
+
+    semi_table %>% data.frame() -> sing
+
+    x <- c(sprintf("%.2f", qs_vector), "", "")
+    f <- c(sprintf(" %.2f%% ", influ), "", "")
+
+    result <- rbind(rbind(sing, x), f)
+    return(result)
+}
+```
+
+##read the results
+
+```{r}
+
+setwd("~/dev/machine-learning")
+breast <- read_csv("result/breast/results_breast.csv", col_names = FALSE, col_types = cols(
+        X27 = col_double()))
+
+breast[2:21] <- NULL
+row.has.na <- apply(breast, 1, function(x){any(is.na(x))})
+breast <- breast[!row.has.na,]
+names(breast) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+
+pima <- read_csv("result/pima/results_pima.csv", col_names = FALSE, col_types = cols(
+        X27 = col_double()))
+pima[2:21] <- NULL
+names(pima) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+
+wine <- read_csv("result/wine/results_wine.csv", col_names = FALSE, col_types = cols(
+        X37 = col_double()))
+wine[2:31] <- NULL
+names(wine) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+
+ionosphere <- read_csv("result/ionosphere/results_ionosphere.csv", col_names = FALSE, col_types = cols(
+        X7 = col_double()))
+names(ionosphere) <- c("network","lambda","alpha","f1_mean","variance","standard_deviation","time_execution")
+```
+# Analysis over the F1 measure 
+## mean f1 
+```{r}
+breast %>% group_by(network, lambda, alpha) %>% 
+         summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_breast
+
+pima %>% group_by(network, lambda, alpha) %>% 
+         summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_pima
+
+wine %>% group_by(network, lambda, alpha) %>% 
+         summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_wine
+
+ionosphere %>% group_by(network, lambda, alpha) %>% 
+         summarize(mean_f1=mean(f1_mean), f1_sd=sd(f1_mean), mean_time=mean(time_execution), time_sd=sd(time_execution)) -> table_mean_ionosphere
+```
+
+## export f1 and time mean datasets
+
+```{r include=FALSE}
+write.table(table_mean_breast, "result/breast.csv", sep=",", row.names = FALSE)
+write.table(table_mean_pima, "result/pima.csv", sep=",", row.names = FALSE)
+write.table(table_mean_wine, "result/wine.csv", sep=",", row.names = FALSE)
+write.table(table_mean_ionosphere, "result/ionosphere.csv" ,sep=",", row.names = FALSE )
+
+write_ods(table_mean_breast, "result/breast.ods")
+write_ods(table_mean_pima, "result/pima.ods")
+write_ods(table_mean_wine, "result/wine.ods")
+write_ods(table_mean_ionosphere, "result/ionosphere.ods")
+
+```
+
+
+## the best f1 
+```{r}
+max(table_mean_breast$mean_f1)
+max(table_mean_pima$mean_f1)
+max(table_mean_wine$mean_f1)
+max(table_mean_ionosphere$mean_f1)
+```
+
+The best F1 measure was 0.9763564, 0.8129781, 0.9650899 and 0.9231376 for breast, pima, wine and ionosphere datasets respectively. 
+
+## which config is the beast
+
+```{r}
+subset(table_mean_breast, mean_f1 == max(mean_f1)) 
+subset(table_mean_pima, mean_f1 == max(mean_f1))
+subset(table_mean_wine, mean_f1 == max(mean_f1))
+subset(table_mean_ionosphere, mean_f1 == max(mean_f1))
+```
+The best config was always using lambda and alpha = 0.1 and the network config was 2 layers and 16 neurons for breast, 1 layers and 16 neurons for pima, 1 layers and 16 neurons for wine and 3 layers and 16 neurons for ionosphere. 
+
+
+## Join datasets for ggplot 
+
+```{r}
+a <- subset(table_mean_breast, mean_f1 == max(mean_f1))
+a['dataset'] = "Breast"
+b <-subset(table_mean_pima, mean_f1 == max(mean_f1))
+b['dataset'] = "Pima"
+c <- subset(table_mean_wine, mean_f1 == max(mean_f1))
+c['dataset'] = "Wine"
+d <-subset(table_mean_ionosphere, mean_f1 == max(mean_f1))
+d['dataset'] = "Ionosphere"
+
+total_dataset <- rbind(a,b,c,d)
+rm(a,b,c,d)
+total_dataset$meta <- paste(total_dataset$lambda,"+",total_dataset$alpha)
+total_dataset
+```
+
+```{r}
+beast_f1<- ggplot(total_dataset, aes(x= dataset, y =mean_f1, fill=as.factor(network))) +
+geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin=mean_f1-f1_sd, ymax=mean_f1+f1_sd), width=.1) +
+  labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network") +
+  theme_bw()
+
+beast_f1
+
+png(filename="result/beast_f1.png", width = 600, height = 400)
+plot(beast_f1)
+dev.off()
+```
+
+Here! the plot the best f1 and config.
+
+# Analysis over the Time Execution
+
+## the best f1 and config 
+```{r}
+
+subset(table_mean_breast, mean_time == min(subset(table_mean_breast, mean_f1 > 0.96)$mean_time))
+
+subset(table_mean_pima, mean_time == min(subset(table_mean_pima, mean_f1 > 0.80)$mean_time))
+
+subset(table_mean_wine, mean_time == min(subset(table_mean_wine, mean_f1 > 0.95)$mean_time))
+
+subset(table_mean_ionosphere, mean_time == min(subset(table_mean_ionosphere, mean_f1 > 0.91)$mean_time))
+
+```
+
+The best F1 measure was 0.97492, 0.8084253, 0.9510885 and 0.9137515 for breast, pima, wine and ionosphere datasets respectively. 
+
+The best config was always using lambda = 0.001 and alpha = 0.1 and the network config was 1 layers and 16 neurons for breast, 1 layers and 16 neurons for pima, 1 layers and 16 neurons for wine. For for ionosphere using lambda = 0.001, alpha = 0.1, 2 layers and 16 neurons.
+
+
+```{r}
+a <- subset(table_mean_breast, mean_time == min(subset(table_mean_breast, mean_f1 > 0.96)$mean_time)) 
+a['dataset'] = "Breast"
+b <-subset(table_mean_pima, mean_time == min(subset(table_mean_pima, mean_f1 > 0.80)$mean_time))
+b['dataset'] = "Pima"
+c <- subset(table_mean_wine, mean_time == min(subset(table_mean_wine, mean_f1 > 0.95)$mean_time))
+c['dataset'] = "Wine"
+d <- subset(table_mean_ionosphere, mean_time == min(subset(table_mean_ionosphere, mean_f1 > 0.91)$mean_time))
+d['dataset'] = "Ionosphere"
+
+total_dataset <- rbind(a,b,c,d)
+rm(a,b,c,d)
+total_dataset$meta <- paste(total_dataset$lambda,"+",total_dataset$alpha)
+total_dataset
+```
+
+```{r}
+beast_time<- ggplot(total_dataset, aes(x= dataset, y =mean_f1, fill=as.factor(network))) +
+geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin=mean_f1-f1_sd, ymax=mean_f1+f1_sd), width=.1) +
+  labs(x ="Datasets", y = "F1 Measure Mean", fill = "Network") +
+  theme_bw()
+
+beast_time
+
+png(filename="result/beast_time.png", width = 600, height = 400)
+plot(beast_time)
+dev.off()
+```
+
+
+## Comparing the F1 beast with the F1 beast basead in time lower 
+
+```{r}
+#  Before  After 
+# 830.1701 623.2053  = 206,9648
+# 1176.831 1079.1647 = 97,6663
+# 280.7203 256.5248 = 24,1955
+# 1083.339 828.5699	= 254,7691
+# 
+# 0.9763564 0.97492 = 0,0014364
+# 0.8129781 0.8084253 = 0,0045528
+# 0.9650899 0.9510885 = 0,0140014
+# 0.9231376 0.9137515 = 0,0093861
+```
+
+
+Using the best config time we reduced the time execution in 206,9648, 97,6663, 24,1955 and 254,7691, and the F1 difference between using the best config F1 to best config time was 0,0014364, 0,0045528, 0,0140014 and 0,0093861 for breast, Inosphere, Pima and Wine datasets respectively. 
+
+## sperate network column
+```{r}
+breast %>% separate(network, c("layers", "neurons")) -> breast
+pima %>% separate(network, c("layers", "neurons")) -> pima
+wine %>% separate(network, c("layers", "neurons")) -> wine
+ionosphere %>% separate(network, c("layers", "neurons")) -> ionosphere
+```
+
+## 2kn table genarate 
+```{r include=FALSE}
+breast_2kn <- alloc_vari_4_fact(breast)
+pima_2kn <- alloc_vari_4_fact(pima)
+winet_2kn <- alloc_vari_4_fact(wine)
+ionosphere_2kn <- alloc_vari_4_fact(ionosphere)
+```
+
+
+```{r include=FALSE}
+write.table(breast_2kn, "result/breast_2kn.csv", sep=",", row.names = FALSE)
+write.table(pima_2kn, "result/pima_2kn.csv", sep=",", row.names = FALSE)
+write.table(winet_2kn, "result/wine_2kn.csv", sep=",", row.names = FALSE)
+write.table(ionosphere_2kn, "result/ionosphere_2kn.csv" ,sep=",", row.names = FALSE )
+
+write_ods(breast_2kn, "result/breast_2kn.ods")
+write_ods(pima_2kn, "result/pima_2kn.ods")
+write_ods(winet_2kn, "result/wine_2kn.ods")
+write_ods(ionosphere_2kn, "result/ionosphere_2kn.ods")
+```
+
+

@@ -1,0 +1,36 @@
+#!/bin/sh
+#SBATCH -p shared
+#SBATCH -n 1
+#SBATCH -J ionosphere
+#SBATCH -t 24:00:00
+
+mkdir -p result
+mkdir -p result/ionosphere
+echo "Running on $SLURM_JOB_NODELIST"
+
+HOST=`hostname`
+DATE=`date "+%d%m%Y-%H%M%S"`
+
+lambda=$1
+alpha=$2
+layers=$3
+neuron=$4
+
+echo "lambda=$lambda alpha=$alpha layers=$layers neuron=$neuron"
+
+FNET="$lambda-$alpha-$layers-$neuron-ionosphere.txt"
+
+echo $lambda > $FNET
+echo $alpha >> $FNET
+echo "33" >> $FNET
+for a in `seq 1 $layers`; do
+	echo $neuron >> $FNET
+done
+echo "2" >> $FNET
+for i in `seq 1 10`; do 
+	OUTPUT=`python3 main_ionosphere.py $FNET | awk -vORS=, '{ print $2 }' | sed 's/,$/\n/'` 
+	echo "$layers+$neuron,$OUTPUT" >> "result/ionosphere/$SLURM_JOB_NODELIST-$DATE-$lambda-$alpha-$layers-$neuron-ionosphere.csv"
+done 
+
+mv *.out out/
+rm -rf $FNET
