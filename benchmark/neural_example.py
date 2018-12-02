@@ -100,32 +100,6 @@ def neural_network(network,weights,regularization,inputs, predictions, max_itera
 
 		for layer in range(0, len(network) - 1):
 			weights[layer] = weights[layer] - alpha * D[layer]
-		# 	print("Theta", layer + 1, "inicial (pesos de cada neuronio, incluindo bias, armazenados nas linhas):\n", print2D(weights[layer]))
-	return 0
-
-def feedfoward(network, weights, inputs,  predictions):
-
-	input_propagate = []
-	for example in range(0, len(inputs)):
-		print("\tProcessando exemplo de treinamento", example + 1)
-		print("\tPropagando entrada", print1D(inputs[example]))
-		input_propagate.append([])
-		for layer in range(0, len(network) - 1):
-			if layer == 0:
-				input_propagate[example].append(np.array(inputs[example], ndmin=2))
-			else:
-				input_propagate[example].append(np.array(sig(z), ndmin=2))
-
-			input_propagate[example][layer] = np.insert(input_propagate[example][layer], 0, 1, 0)
-
-			print("\t\ta" + str(layer + 1) + ":", print1Dm(input_propagate[example][layer]), "\n")
-
-			z = np.dot(weights[layer], input_propagate[example][layer])
-			print("\t\tz" + str(layer + 2) + ":", print1D(z))
-		layer = layer + 1
-		input_propagate[example].append(np.array(sig(z), ndmin=2))
-
-		print("\tSaida predita para o exemplo", example + 1, ":", print1D(input_propagate[example][layer]))
-		print("\tSaida esperada para o exemplo", example + 1, ":", print1D(predictions[example]))
-
-	return 0
+			print("Theta", layer + 1, "inicial (pesos de cada neuronio, incluindo bias, armazenados nas linhas):\n", print2D(weights[layer]))
+	
+	return weights

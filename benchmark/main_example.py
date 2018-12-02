@@ -6,21 +6,20 @@ import argcomplete,argparse
 
 def main():
 
-    # parser = argparse.ArgumentParser(description='Argument')
-    # parser.add_argument('--network', "--n",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    # parser.add_argument('--weights', "--w",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    # parser.add_argument('--dataset', "--d",required=True,  metavar='FILE', type=str).completer = EnvironCompleter
-    # parser.add_argument('--log', "--l", required=False, default=True).completer = EnvironCompleter
+    parser = argparse.ArgumentParser(description='Argument')
+    parser.add_argument('--network', "--n",required=True,  metavar='FILE', type=str)
+    parser.add_argument('--weights', "--w",required=True,  metavar='FILE', type=str)
+    parser.add_argument('--dataset', "--d",required=True,  metavar='FILE', type=str)
 
-    # argcomplete.autocomplete(parser)
-    # args = parser.parse_args()
+    argcomplete.autocomplete(parser)
+    args = parser.parse_args()
     
      
     np.set_printoptions(precision=5)
     
     network=[]
 
-    fnetwork = open("network2.txt", "r")
+    fnetwork = open(args.network, "r")
     regularization = float(fnetwork.readline())
     for line in fnetwork:
         network.append(int(line))
@@ -31,7 +30,7 @@ def main():
 
     # lista de matrizes de pesos
     weights=[]
-    fweights = open("initial_weights2.txt", "r")
+    fweights = open(args.weights, "r")
 
     i = 0
     for l in fweights:
@@ -55,7 +54,7 @@ def main():
     inputs=[]
     predictions=[]
 
-    fdataset = open("dataset2.txt", "r")
+    fdataset = open(args.dataset, "r")
     i = 0
     for l in fdataset:
         a, b = l.split(";")
